@@ -66,20 +66,20 @@ class RiceFieldBot:
         # Check for specific keyword combinations first
         if any(word in message_lower for word in ["weed", "weeds"]):
             if "alert" in message_lower or "detected" in message_lower:
-                return "🌾 **Weed Alert Status**: Our latest multi-spectral scan detected weeds in Sector B-5.\n\n📍 **Location**: GPS: https://maps.google.com/?q=13.0827,80.2707\n\n🎯 **Recommended Action**: Targeted herbicide application within 48 hours\n\n📊 **Detection Confidence**: 87%\n\nType 'weed details' for comprehensive analysis report."
+                return "🌾 **U-Net Weed Detection Alert**:\n\n📡 **Input Channels**: Blue, Green, Red, Red Edge, NIR (5-channel)\n\n📍 **Location**: Field Alpha, Sector B-5 (Coordinates: 13.0827, 80.2707)\n🔗 GPS: https://maps.google.com/?q=13.0827,80.2707\n\n📊 **Detection Results**:\n• Area Covered: ~12 m²\n• Model Confidence: 87%\n• Segmentation Mask: Generated\n• Weed Type: *Echinochloa crus-galli* (Barnyard Grass)\n\n🎯 **Recommended Action**: Targeted herbicide application within 48 hours\n\nType 'weed details' for segmentation mask and full CNN analysis report."
             else:
                 return FAQ_DICT.get("weed", "No specific information available about weeds.")
         
         elif any(word in message_lower for word in ["health", "crop health", "ndvi"]):
-            return "🌱 **Crop Health Report**:\n\n📈 **Overall NDVI Index**: 0.72 (Good vigor)\n\n⚠️ **Issue Detected**: Minor nitrogen deficiency in northern plot (Grid N3-N7)\n\n📊 **Health Distribution**:\n• Excellent: 45% of field\n• Good: 35% of field\n• Fair: 15% of field\n• Poor: 5% of field\n\n🔗 Detailed report available on your dashboard."
+            return "🌱 **Crop Health Analysis (Multi-Index)**:\n\n📊 **Vegetation Indices**:\n• **NDVI**: 0.72 (Good vigor)\n• **NDRE**: 0.68 (Adequate nitrogen)\n• **GNDVI**: 0.65 (Healthy biomass)\n\n⚠️ **Findings**: Minor nitrogen stress in northern plot (Grid N3-N7)\n💯 **Overall Health Score**: 78/100\n\n📈 **Distribution**:\n• Excellent (>0.7): 45% of field\n• Good (0.5-0.7): 35% of field\n• Fair (0.3-0.5): 15% of field\n• Poor (<0.3): 5% of field\n\n🔗 Detailed health maps available on dashboard."
         
         elif any(word in message_lower for word in ["yield", "prediction", "harvest"]):
-            return "📊 **Yield Prediction Analysis**:\n\n🌾 **Predicted Yield**: 6.2 tons/hectare\n\n🔬 **Variety**: Basmati (Premium grade)\n\n📅 **Harvest Window**: 45-50 days from today\n\n📈 **Confidence Level**: 92%\n\n💰 **Expected Revenue**: ₹2,48,000 per hectare (at current market rates)\n\nBased on current health metrics, weather patterns, and historical data."
+            return "📊 **Yield Prediction (Ensemble Model)**:\n\n🤖 **Model**: Random Forest + Gradient Boosting\n\n🌾 **Predicted Yield**: 6.2 tons/hectare\n📈 **Confidence**: 92% (±0.4 tons/hectare)\n\n🔬 **Based On**:\n• Multispectral image analysis\n• NDVI & vegetation indices\n• Growth stage: Panicle initiation (62 days)\n• Weather patterns: Optimal moisture\n\n📅 **Expected Harvest**: 45-50 days from today\n💰 **Estimated Revenue**: ₹2,48,000/hectare (at market rates)"
         
         elif any(word in message_lower for word in ["action", "actions", "recommend", "do", "next"]):
-            return "📋 **Recommended Actions**:\n\n1️⃣ **Immediate** (Next 24-48h):\n   • Inspect weed cluster at Sector B-5\n   • Apply targeted herbicide treatment\n\n2️⃣ **This Week**:\n   • Soil amendment for nitrogen deficiency (Northern plot)\n   • Check irrigation system pressure\n\n3️⃣ **Next 15 days**:\n   • Scheduled re-scan for progress monitoring\n   • Fertilizer application based on soil test\n\n🔔 **Next Alert**: Automated scan in 7 days"
+            return "📋 **AI-Recommended Actions**:\n\n1️⃣ **Immediate (24-48h)**:\n   • Deploy U-Net weed detection alerts for Sector B-5\n   • Target herbicide for identified weed areas\n\n2️⃣ **This Week**:\n   • Apply Nitrogen fertilizer (NDRE indicated deficiency)\n   • Irrigation: Monitor soil moisture (current: 42%)\n   • Check for early disease symptoms\n\n3️⃣ **Next 15 Days**:\n   • Re-scan field with multispectral imaging\n   • Assess P & K requirements via CNN analysis\n   • Verify yield forecast model inputs\n\n🔔 **Next Automated Scan**: In 7 days"
         
-        elif any(word in message_lower for word in ["fertilizer", "nutrition", "nutrient"]):
+        elif any(word in message_lower for word in ["fertilizer", "nutrition", "nutrient", "npk"]):
             return FAQ_DICT.get("fertilizer", "No specific fertilizer information available.")
         
         # Check individual keywords
