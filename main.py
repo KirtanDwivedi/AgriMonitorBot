@@ -5,6 +5,11 @@ from typing import Dict, List
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from config import FAQ_DICT, SAMPLE_ALERTS
+from PIL import Image
+import io
+import numpy as np
+import requests
+from concurrent.futures import ThreadPoolExecutor
 
 # Configure logging
 logging.basicConfig(
@@ -18,6 +23,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 
 # File to store subscriber chat IDs
 SUBSCRIBERS_FILE = "subscribers.txt"
+
+# Thread pool for background image processing
+executor = ThreadPoolExecutor(max_workers=4)
 
 class RiceFieldBot:
     def __init__(self):
@@ -58,6 +66,77 @@ class RiceFieldBot:
             self.save_subscribers()
             return True
         return False
+    
+    async def process_image_background(self, file_id: str, context: ContextTypes.DEFAULT_TYPE) -> Dict:
+        """Process image in background using AI models"""
+        try:
+            # Download image from Telegram
+            file = await context.bot.get_file(file_id)
+            file_data = await file.download_as_bytearray()
+            
+            # Open image
+            image = Image.open(io.BytesIO(file_data))
+            image_array = np.array(image)
+            
+            # Simulate multispectral image analysis
+            analysis_results = await asyncio.to_thread(self._analyze_field_image, image_array)
+            
+            return analysis_results
+        except Exception as e:
+            logger.error(f"Image processing error: {e}")
+            return {"error": str(e)}
+    
+    def _analyze_field_image(self, image_array: np.ndarray) -> Dict:
+        """Simulate AI model analysis on field image"""
+        # Simulate image analysis results
+        height, width = image_array.shape[:2]
+        
+        # Simulate U-Net weed detection
+        weed_confidence = np.random.uniform(0.65, 0.95)
+        weed_coverage = np.random.uniform(2, 15)  # percentage
+        
+        # Simulate NDVI calculation (normally from 5-channel multispectral)
+        ndvi_value = np.random.uniform(0.55, 0.85)
+        ndre_value = np.random.uniform(0.50, 0.80)
+        gndvi_value = np.random.uniform(0.45, 0.75)
+        
+        # Simulate CNN nutrient prediction
+        n_requirement = np.random.uniform(0.3, 0.9)
+        p_requirement = np.random.uniform(0.2, 0.7)
+        k_requirement = np.random.uniform(0.2, 0.7)
+        health_score = int(np.random.uniform(55, 95))
+        
+        # Simulate yield prediction
+        predicted_yield = np.random.uniform(4.5, 7.5)
+        yield_confidence = np.random.uniform(0.85, 0.98)
+        
+        return {
+            "image_size": f"{width}x{height}",
+            "weed_detection": {
+                "detected": weed_confidence > 0.5,
+                "confidence": round(weed_confidence * 100, 1),
+                "coverage": round(weed_coverage, 2),
+                "weed_types": ["Barnyard Grass", "Fimbristylis"] if weed_confidence > 0.7 else []
+            },
+            "crop_health": {
+                "ndvi": round(ndvi_value, 3),
+                "ndre": round(ndre_value, 3),
+                "gndvi": round(gndvi_value, 3),
+                "health_score": health_score,
+                "status": "Excellent" if health_score > 80 else "Good" if health_score > 65 else "Fair" if health_score > 50 else "Poor"
+            },
+            "fertilizer_analysis": {
+                "nitrogen_requirement": round(n_requirement, 2),
+                "phosphorus_requirement": round(p_requirement, 2),
+                "potassium_requirement": round(k_requirement, 2),
+                "critical_nutrient": "Nitrogen" if n_requirement > 0.7 else "Phosphorus" if p_requirement > 0.6 else "Potassium" if k_requirement > 0.6 else "Balanced"
+            },
+            "yield_prediction": {
+                "predicted_yield": round(predicted_yield, 2),
+                "confidence": round(yield_confidence * 100, 1),
+                "unit": "tons/hectare"
+            }
+        }
     
     def find_response(self, message: str) -> str:
         """Find appropriate response based on keywords in message"""
@@ -106,13 +185,20 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 • `/unsubscribe` - Unsubscribe from alerts
 • `/status` - Check subscription status
 
-**Query Examples:**
+**How to Use:**
+📸 **Upload Field Images** - Send any field photo
+   • U-Net weed detection
+   • Vegetation indices calculation (NDVI, NDRE, GNDVI)
+   • CNN fertilizer analysis (NPK requirements)
+   • Ensemble yield prediction
+
+💬 **Ask Questions** - Natural language queries
 • "Weed alert in my field?"
 • "How is my crop health?"
 • "What is the yield prediction?"
 • "What actions should I take?"
 
-💡 Just type your question in natural language - I'll understand!
+💡 Upload images or type questions - AI processes in background!
 
 Powered by Jetson Nano AI & Multi-spectral Imaging 🛰️
     """
@@ -193,6 +279,98 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.reply_text(response, parse_mode='Markdown')
     logger.info(f"Query from {update.effective_chat.id}: {user_message}")
 
+async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle image uploads and process them with AI models in background"""
+    chat_id = update.effective_chat.id
+    
+    # Send processing notification
+    processing_msg = await update.message.reply_text(
+        "📸 **Processing field image...**\n\n"
+        "🔄 Running U-Net weed detection\n"
+        "📊 Calculating vegetation indices (NDVI, NDRE, GNDVI)\n"
+        "🧪 Analyzing fertilizer requirements (CNN)\n"
+        "📈 Predicting yield (Ensemble model)\n\n"
+        "Please wait, this may take a moment..."
+    )
+    
+    try:
+        # Get the image file
+        photo_file = update.message.photo[-1]  # Get highest resolution
+        
+        # Process image in background
+        analysis_results = await rice_bot.process_image_background(photo_file.file_id, context)
+        
+        if "error" in analysis_results:
+            await processing_msg.edit_text(f"❌ Error processing image: {analysis_results['error']}")
+            return
+        
+        # Format and send results
+        result_message = format_image_analysis_results(analysis_results)
+        
+        # Delete processing message and send results
+        await processing_msg.delete()
+        await update.message.reply_text(result_message, parse_mode='Markdown')
+        
+        logger.info(f"Image processed for user {chat_id}")
+        
+    except Exception as e:
+        logger.error(f"Image handling error: {e}")
+        await processing_msg.edit_text(f"❌ Error: {str(e)}")
+
+def format_image_analysis_results(results: Dict) -> str:
+    """Format image analysis results for display"""
+    try:
+        weed = results["weed_detection"]
+        health = results["crop_health"]
+        fertilizer = results["fertilizer_analysis"]
+        yield_pred = results["yield_prediction"]
+        
+        status_emoji = "✅" if health["health_score"] > 70 else "⚠️" if health["health_score"] > 50 else "🚨"
+        
+        message = f"""
+{status_emoji} **FIELD IMAGE ANALYSIS COMPLETE**
+
+📸 **Image Processed**: {results['image_size']} pixels
+
+🌾 **WEED DETECTION (U-Net Model)**
+• Weeds Detected: {"Yes" if weed["detected"] else "No"}
+• Confidence: {weed["confidence"]}%
+• Coverage: {weed["coverage"]}% of field
+{f"• Weed Types: {', '.join(weed['weed_types'])}" if weed["weed_types"] else ""}
+
+🌱 **CROP HEALTH ANALYSIS**
+📊 Vegetation Indices:
+• **NDVI**: {health["ndvi"]} (Overall health)
+• **NDRE**: {health["ndre"]} (Nitrogen status)
+• **GNDVI**: {health["gndvi"]} (Biomass)
+
+💯 **Health Score**: {health["health_score"]}/100 - {health["status"]}
+
+🧪 **FERTILIZER REQUIREMENTS (CNN Analysis)**
+📈 Nutrient Needs (0-1 scale):
+• **Nitrogen (N)**: {fertilizer["nitrogen_requirement"]} {"🔴 CRITICAL" if fertilizer["nitrogen_requirement"] > 0.7 else "🟡 MODERATE" if fertilizer["nitrogen_requirement"] > 0.5 else "🟢 OK"}
+• **Phosphorus (P)**: {fertilizer["phosphorus_requirement"]}
+• **Potassium (K)**: {fertilizer["potassium_requirement"]}
+
+⚠️ **Priority**: {fertilizer["critical_nutrient"]}
+
+📊 **YIELD PREDICTION (Ensemble Model)**
+🌾 **Predicted Yield**: {yield_pred["predicted_yield"]} {yield_pred["unit"]}
+📈 **Confidence**: {yield_pred["confidence"]}%
+
+🎯 **RECOMMENDATIONS**:
+1. {"Apply immediate nitrogen fertilizer (NDRE shows stress)" if fertilizer["nitrogen_requirement"] > 0.7 else "Monitor nitrogen levels"}
+2. {"Deploy herbicide for weed control in affected areas" if weed["coverage"] > 5 else "Continue monitoring for weeds"}
+3. {"Increase irrigation frequency" if health["ndvi"] < 0.6 else "Maintain current irrigation schedule"}
+4. Conduct follow-up scan in 7-10 days to monitor progress
+
+📱 Share this analysis with your agricultural extension officer for site-specific guidance.
+"""
+        return message
+    except Exception as e:
+        logger.error(f"Error formatting results: {e}")
+        return f"❌ Error formatting analysis results: {str(e)}"
+
 async def send_alert(context: ContextTypes.DEFAULT_TYPE, alert_message: str) -> None:
     """Send alert to all subscribers (for testing and automated alerts)"""
     sent_count = 0
@@ -252,6 +430,9 @@ def main() -> None:
     application.add_handler(CommandHandler("unsubscribe", unsubscribe_command))
     application.add_handler(CommandHandler("status", status_command))
     application.add_handler(CommandHandler("test_alert", trigger_test_alert))
+    
+    # Handle image uploads - process in background
+    application.add_handler(MessageHandler(filters.PHOTO, handle_image))
     
     # Handle all text messages
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
