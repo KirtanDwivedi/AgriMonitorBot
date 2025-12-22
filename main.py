@@ -195,6 +195,69 @@ class RiceFieldBot:
         elif any(word in message_lower for word in ["fertilizer", "nutrition", "nutrient", "npk"]):
             return FAQ_DICT.get("fertilizer", "No specific fertilizer information available.")
         
+        elif any(word in message_lower for word in ["growth", "stage", "development", "tillering", "heading"]):
+            return FAQ_DICT.get("growth", "Check our growth stage analysis system.")
+        
+        elif any(word in message_lower for word in ["seedling", "nursery"]):
+            return FAQ_DICT.get("seedling", "Seedling stage information not available.")
+        
+        elif any(word in message_lower for word in ["tiller", "shoot"]):
+            return FAQ_DICT.get("tillering", "Tillering information not available.")
+        
+        elif any(word in message_lower for word in ["heading", "panicle", "emergence"]):
+            return FAQ_DICT.get("heading", "Heading stage information not available.")
+        
+        elif any(word in message_lower for word in ["flower", "grain", "filling", "pollination"]):
+            return FAQ_DICT.get("flowering", "Flowering stage information not available.")
+        
+        elif any(word in message_lower for word in ["ripen", "mature", "maturity"]):
+            return FAQ_DICT.get("maturity", "Maturity stage information not available.")
+        
+        elif any(word in message_lower for word in ["pest", "insect", "bug", "hopper", "borer"]):
+            return FAQ_DICT.get("pest", "Pest management information not available.")
+        
+        elif any(word in message_lower for word in ["blast", "fungal", "infection"]):
+            return FAQ_DICT.get("blast", "Blast disease information not available.")
+        
+        elif any(word in message_lower for word in ["blight", "bacterial", "bacterial"]):
+            return FAQ_DICT.get("blight", "Blight disease information not available.")
+        
+        elif any(word in message_lower for word in ["soil", "earth", "field", "pH"]):
+            return FAQ_DICT.get("soil", "Soil health information not available.")
+        
+        elif any(word in message_lower for word in ["water", "moisture", "flood", "drain"]):
+            return FAQ_DICT.get("water", "Water management information not available.")
+        
+        elif any(word in message_lower for word in ["nitrogen", "n deficiency", "yellow"]):
+            return FAQ_DICT.get("nitrogen", "Nitrogen information not available.")
+        
+        elif any(word in message_lower for word in ["phosphorus", "p deficiency", "purple"]):
+            return FAQ_DICT.get("phosphorus", "Phosphorus information not available.")
+        
+        elif any(word in message_lower for word in ["potassium", "k deficiency", "scorch", "lodging"]):
+            return FAQ_DICT.get("potassium", "Potassium information not available.")
+        
+        elif any(word in message_lower for word in ["harvest", "reap", "cutting", "gathering"]):
+            return FAQ_DICT.get("harvest", "Harvesting information not available.")
+        
+        elif any(word in message_lower for word in ["storage", "store", "preserve"]):
+            return FAQ_DICT.get("storage", "Storage information not available.")
+        
+        elif any(word in message_lower for word in ["remote", "satellite", "imaging", "multispectral"]):
+            return FAQ_DICT.get("remote", "Remote sensing information not available.")
+        
+        elif any(word in message_lower for word in ["organic", "chemical-free", "sustainable"]):
+            return FAQ_DICT.get("organic", "Organic farming information not available.")
+        
+        elif any(word in message_lower for word in ["climate", "weather", "resilient", "stress"]):
+            return FAQ_DICT.get("climate", "Climate information not available.")
+        
+        elif any(word in message_lower for word in ["price", "market", "cost", "sell", "rate"]):
+            return FAQ_DICT.get("price", "Pricing information not available.")
+        
+        elif any(word in message_lower for word in ["quality", "standard", "grade", "grade"]):
+            return FAQ_DICT.get("quality", "Quality information not available.")
+        
         # Check individual keywords
         for keyword, response in FAQ_DICT.items():
             if keyword in message_lower:
